@@ -1,5 +1,5 @@
-Config              = {}
-Config.Locale       = 'en'
+Config = {}
+Config.Locale = 'en'
 
 Config.MarkerType   = 1
 Config.DrawDistance = 100.0
@@ -20,6 +20,9 @@ Config.MarkerInfo2 = {
 	r = 255, g = 0, b = 0,     -- Red Color
 	x = 5.0, y = 5.0, z = 1.0  -- Standard Size Circle
 }
+
+Config.EnableSpecificOnly = true -- If true it will only show Blips to Job Specific Players | false shows it to Everyone.
+Config.EnableBlips = true -- If true then it will show blips | false does the Opposite.
 
 Config.SpawnerLocations = {
 	Spawner_Docks = {

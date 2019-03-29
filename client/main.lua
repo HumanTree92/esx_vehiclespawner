@@ -10,9 +10,10 @@ local Keys = {
   ["NENTER"] = 201, ["N4"] = 108, ["N5"] = 60, ["N6"] = 107, ["N+"] = 96, ["N-"] = 97, ["N7"] = 117, ["N8"] = 61, ["N9"] = 118
 }
 
-ESX    = nil
+ESX = nil
 
-local PlayerData = {}
+local PlayerData              = {}
+local BlipList                = {}
 local HasAlreadyEnteredMarker = false
 local LastZone                = nil
 local CurrentAction           = nil
@@ -32,8 +33,23 @@ Citizen.CreateThread(function()
 	end
 
 	ESX.PlayerData = ESX.GetPlayerData()
+	refreshBlips()
 end)
 
+RegisterNetEvent('esx:playerLoaded')
+AddEventHandler('esx:playerLoaded', function(xPlayer)
+	ESX.PlayerData = xPlayer
+	refreshBlips()
+end)
+
+RegisterNetEvent('esx:setJob')
+AddEventHandler('esx:setJob', function(job)
+	ESX.PlayerData.job = job
+	deleteBlips()
+	refreshBlips()
+end)
+
+-- Open Menu Spawner
 function OpenMenuSpawner(PointType)
 	ESX.UI.Menu.CloseAll()
 	
@@ -58,17 +74,13 @@ function OpenMenuSpawner(PointType)
 		elseif action == 'return_spawners' then
 			ListMenuReturn()
 		end
-		
-		--local playerPed = GetPlayerPed(-1)
-		--SpawnVehicle(data.current.value)
-		
 	end, function (data, menu)
 		menu.close()
 	end)
 end
 
+-- List Vehicles
 function ListMenuSpawner()
-	--local elements = Config.Vehicles
 	local elements = {
 		{label = _U('dont_abuse')}
 	}
@@ -137,12 +149,18 @@ Citizen.CreateThread(function()
 		
 		local playerPed = PlayerPedId()
 		local coords    = GetEntityCoords(playerPed)
+		local canSleep  = true
 		
 		for k,v in pairs(Config.SpawnerLocations) do
 			if (GetDistanceBetweenCoords(coords, v.Marker.x, v.Marker.y, v.Marker.z, true) < Config.DrawDistance) then
+				canSleep = false
 				DrawMarker(Config.MarkerType, v.Marker.x, v.Marker.y, v.Marker.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0, Config.MarkerInfo.x, Config.MarkerInfo.y, Config.MarkerInfo.z, Config.MarkerInfo.r, Config.MarkerInfo.g, Config.MarkerInfo.b, 100, false, true, 2, false, false, false, false)	
 				DrawMarker(Config.MarkerType, v.Deleter.x, v.Deleter.y, v.Deleter.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0, Config.MarkerInfo2.x, Config.MarkerInfo2.y, Config.MarkerInfo2.z, Config.MarkerInfo2.r, Config.MarkerInfo2.g, Config.MarkerInfo2.b, 100, false, true, 2, false, false, false, false)	
 			end
+		end
+		
+		if canSleep then
+			Citizen.Wait(500)
 		end
 	end
 end)
@@ -181,6 +199,10 @@ Citizen.CreateThread(function()
 			hasAlreadyEnteredMarker = false
 			TriggerEvent('esx_vehiclespawner:hasExitedMarker', LastZone)
 		end
+		
+		if not isInMarker then
+			Citizen.Wait(500)
+		end
 	end
 end)
 
@@ -208,34 +230,49 @@ Citizen.CreateThread(function()
 end)
 
 -- Blips
-Citizen.CreateThread(function()
-	local blipList = {}
-	
-	for k,v in pairs(Config.SpawnerLocations) do
-		table.insert(blipList, {
-			coords = { v.Marker.x, v.Marker.y },
-			text   = _U('blip_spawner'),
-			sprite = Config.BlipSpawner.Sprite,
-			color  = Config.BlipSpawner.Color,
-			scale  = Config.BlipSpawner.Scale
-		})
+function deleteBlips()
+	if BlipList[1] ~= nil then
+		for i=1, #BlipList, 1 do
+			RemoveBlip(BlipList[i])
+			BlipList[i] = nil
+		end
 	end
-	
-	for i=1, #blipList, 1 do
-		CreateBlip(blipList[i].coords, blipList[i].text, blipList[i].sprite, blipList[i].color, blipList[i].scale)
+end
+
+function refreshBlips()
+	if Config.EnableBlips then
+		if Config.EnableSpecificOnly then
+			if ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'unemployed' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'gang' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'fisherman' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'fueler' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'lumberjack' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'miner' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'butcher' then
+				for k,v in pairs(Config.SpawnerLocations) do
+					local blip = AddBlipForCoord(v.Marker.x, v.Marker.y)
+
+					SetBlipSprite (blip, Config.BlipSpawner.Sprite)
+					SetBlipDisplay(blip, Config.BlipSpawner.Display)
+					SetBlipScale  (blip, Config.BlipSpawner.Scale)
+					SetBlipColour (blip, Config.BlipSpawner.Color)
+					SetBlipAsShortRange(blip, true)
+
+					BeginTextCommandSetBlipName("STRING")
+					AddTextComponentString(_U('blip_spawner'))
+					EndTextCommandSetBlipName(blip)
+					table.insert(BlipList, blip)
+				end
+			end
+		else
+			for k,v in pairs(Config.SpawnerLocations) do
+				local blip = AddBlipForCoord(v.Marker.x, v.Marker.y)
+
+				SetBlipSprite (blip, Config.BlipSpawner.Sprite)
+				SetBlipDisplay(blip, Config.BlipSpawner.Display)
+				SetBlipScale  (blip, Config.BlipSpawner.Scale)
+				SetBlipColour (blip, Config.BlipSpawner.Color)
+				SetBlipAsShortRange(blip, true)
+
+				BeginTextCommandSetBlipName("STRING")
+				AddTextComponentString(_U('blip_spawner'))
+				EndTextCommandSetBlipName(blip)
+				table.insert(BlipList, blip)
+			end
+		end
 	end
-end)
-
-function CreateBlip(coords, text, sprite, color, scale)
-	local blip = AddBlipForCoord( table.unpack(coords) )
-
-	SetBlipSprite(blip, sprite)
-	SetBlipScale(blip, scale)
-	SetBlipColour(blip, color)
-
-	SetBlipAsShortRange(blip, true)
-
-	BeginTextCommandSetBlipName('STRING')
-	AddTextComponentSubstringPlayerName(text)
-	EndTextCommandSetBlipName(blip)
 end
