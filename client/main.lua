@@ -1,15 +1,3 @@
-local Keys = {
-  ["ESC"] = 322, ["F1"] = 288, ["F2"] = 289, ["F3"] = 170, ["F5"] = 166, ["F6"] = 167, ["F7"] = 168, ["F8"] = 169, ["F9"] = 56, ["F10"] = 57,
-  ["~"] = 243, ["1"] = 157, ["2"] = 158, ["3"] = 160, ["4"] = 164, ["5"] = 165, ["6"] = 159, ["7"] = 161, ["8"] = 162, ["9"] = 163, ["-"] = 84, ["="] = 83, ["BACKSPACE"] = 177,
-  ["TAB"] = 37, ["Q"] = 44, ["W"] = 32, ["E"] = 38, ["R"] = 45, ["T"] = 245, ["Y"] = 246, ["U"] = 303, ["P"] = 199, ["["] = 39, ["]"] = 40, ["ENTER"] = 18,
-  ["CAPS"] = 137, ["A"] = 34, ["S"] = 8, ["D"] = 9, ["F"] = 23, ["G"] = 47, ["H"] = 74, ["K"] = 311, ["L"] = 182,
-  ["LEFTSHIFT"] = 21, ["Z"] = 20, ["X"] = 73, ["C"] = 26, ["V"] = 0, ["B"] = 29, ["N"] = 249, ["M"] = 244, [","] = 82, ["."] = 81,
-  ["LEFTCTRL"] = 36, ["LEFTALT"] = 19, ["SPACE"] = 22, ["RIGHTCTRL"] = 70,
-  ["HOME"] = 213, ["PAGEUP"] = 10, ["PAGEDOWN"] = 11, ["DELETE"] = 178,
-  ["LEFT"] = 174, ["RIGHT"] = 175, ["TOP"] = 27, ["DOWN"] = 173,
-  ["NENTER"] = 201, ["N4"] = 108, ["N5"] = 60, ["N6"] = 107, ["N+"] = 96, ["N-"] = 97, ["N7"] = 117, ["N8"] = 61, ["N9"] = 118
-}
-
 ESX = nil
 
 local PlayerData              = {}
@@ -27,7 +15,7 @@ Citizen.CreateThread(function()
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 		Citizen.Wait(0)
 	end
-	
+
 	while ESX.GetPlayerData().job == nil do
 		Citizen.Wait(10)
 	end
@@ -52,15 +40,15 @@ end)
 -- Open Menu Spawner
 function OpenMenuSpawner(PointType)
 	ESX.UI.Menu.CloseAll()
-	
+
 	local elements = {}
-	
+
 	if PointType == 'spawner_point' then
 		table.insert(elements, {label = _U('list_spawners'), value = 'list_spawners'})
 	elseif PointType == 'deleter_point' then
 		table.insert(elements, {label = _U('return_spawners'), value = 'return_spawners'})
 	end
-	
+
 	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'spawner_menu', {
 		title    = _U('spawner'),
 		align    = 'top-left',
@@ -68,7 +56,7 @@ function OpenMenuSpawner(PointType)
 	}, function(data, menu)
 		menu.close()
 		local action = data.current.value
-		
+
 		if action == 'list_spawners' then
 			ListMenuSpawner()
 		elseif action == 'return_spawners' then
@@ -84,14 +72,14 @@ function ListMenuSpawner()
 	local elements = {
 		{label = _U('dont_abuse')}
 	}
-	
+
 	for i=1, #Config.Vehicles, 1 do
 		table.insert(elements, {
 			label = Config.Vehicles[i].label,
 			model = Config.Vehicles[i].model
 		})
 	end
-	
+
 	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'vehicle_spawner', {
 		title    = _U('vehicle_spawner'),
 		align    = 'top-left',
@@ -106,7 +94,7 @@ end
 
 function ListMenuReturn()
 	local playerCoords = GetEntityCoords(PlayerPedId())
-	
+
 	vehicles = ESX.Game.GetVehiclesInArea(playerCoords, 5.0)
 	if #vehicles > 0 then
 		for k,v in ipairs(vehicles) do
@@ -146,11 +134,11 @@ end)
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(1)
-		
+
 		local playerPed = PlayerPedId()
 		local coords    = GetEntityCoords(playerPed)
 		local canSleep  = true
-		
+
 		for k,v in pairs(Config.SpawnerLocations) do
 			if (GetDistanceBetweenCoords(coords, v.Marker.x, v.Marker.y, v.Marker.z, true) < Config.DrawDistance) then
 				canSleep = false
@@ -158,7 +146,7 @@ Citizen.CreateThread(function()
 				DrawMarker(Config.MarkerType, v.Deleter.x, v.Deleter.y, v.Deleter.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0, Config.MarkerInfo2.x, Config.MarkerInfo2.y, Config.MarkerInfo2.z, Config.MarkerInfo2.r, Config.MarkerInfo2.g, Config.MarkerInfo2.b, 100, false, true, 2, false, false, false, false)	
 			end
 		end
-		
+
 		if canSleep then
 			Citizen.Wait(500)
 		end
@@ -170,36 +158,36 @@ Citizen.CreateThread(function()
 	local currentZone = ''
 	while true do
 		Citizen.Wait(1)
-		
+
 		local playerPed  = PlayerPedId()
 		local coords     = GetEntityCoords(playerPed)
 		local isInMarker = false
-		
+
 		for k,v in pairs(Config.SpawnerLocations) do
 			if (GetDistanceBetweenCoords(coords, v.Marker.x, v.Marker.y, v.Marker.z, true) < Config.MarkerInfo.x) then
 				isInMarker   = true
 				this_Spawner = v
 				currentZone  = 'spawner_point'
 			end
-			
+
 			if(GetDistanceBetweenCoords(coords, v.Deleter.x, v.Deleter.y, v.Deleter.z, true) < Config.MarkerInfo2.x) then
 				isInMarker   = true
 				this_Spawner = v
 				currentZone  = 'deleter_point'
 			end
 		end
-		
+
 		if isInMarker and not hasAlreadyEnteredMarker then
 			hasAlreadyEnteredMarker = true
 			LastZone                = currentZone
 			TriggerEvent('esx_vehiclespawner:hasEnteredMarker', currentZone)
 		end
-		
+
 		if not isInMarker and hasAlreadyEnteredMarker then
 			hasAlreadyEnteredMarker = false
 			TriggerEvent('esx_vehiclespawner:hasExitedMarker', LastZone)
 		end
-		
+
 		if not isInMarker then
 			Citizen.Wait(500)
 		end
@@ -210,17 +198,17 @@ end)
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)
-		
+
 		if CurrentAction ~= nil then
 			ESX.ShowHelpNotification(CurrentActionMsg)
-			
-			if IsControlJustReleased(0, Keys['E']) then
+
+			if IsControlJustReleased(0, 38) then
 				if CurrentAction == 'spawner_point' then
 					OpenMenuSpawner('spawner_point')
 				elseif CurrentAction == 'deleter_point' then
 					OpenMenuSpawner('deleter_point')
 				end
-				
+
 				CurrentAction = nil
 			end
 		else
