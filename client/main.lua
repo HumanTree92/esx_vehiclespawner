@@ -1,74 +1,18 @@
-ESX = nil
-
-local PlayerData              = {}
-local BlipList                = {}
+local CurrentActionData, this_Spawner = {}, {}
 local HasAlreadyEnteredMarker = false
-local LastZone                = nil
-local CurrentAction           = nil
-local CurrentActionMsg        = ''
-local CurrentActionData       = {}
-local spawnedVehicles         = {}
-local this_Spawner            = {}
+local LastZone, CurrentAction, CurrentActionMsg
+ESX = nil
 
 Citizen.CreateThread(function()
 	while ESX == nil do
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 		Citizen.Wait(0)
 	end
-
-	while ESX.GetPlayerData().job == nil do
-		Citizen.Wait(10)
-	end
-
-	ESX.PlayerData = ESX.GetPlayerData()
-	refreshBlips()
 end)
 
-RegisterNetEvent('esx:playerLoaded')
-AddEventHandler('esx:playerLoaded', function(xPlayer)
-	ESX.PlayerData = xPlayer
-	refreshBlips()
-end)
-
-RegisterNetEvent('esx:setJob')
-AddEventHandler('esx:setJob', function(job)
-	ESX.PlayerData.job = job
-	deleteBlips()
-	refreshBlips()
-end)
-
--- Open Menu Spawner
-function OpenMenuSpawner(PointType)
-	ESX.UI.Menu.CloseAll()
-
-	local elements = {}
-
-	if PointType == 'spawner_point' then
-		table.insert(elements, {label = _U('list_spawners'), value = 'list_spawners'})
-	elseif PointType == 'deleter_point' then
-		table.insert(elements, {label = _U('return_spawners'), value = 'return_spawners'})
-	end
-
-	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'spawner_menu', {
-		title    = _U('spawner'),
-		align    = 'top-left',
-		elements = elements
-	}, function(data, menu)
-		menu.close()
-		local action = data.current.value
-
-		if action == 'list_spawners' then
-			ListMenuSpawner()
-		elseif action == 'return_spawners' then
-			ListMenuReturn()
-		end
-	end, function (data, menu)
-		menu.close()
-	end)
-end
-
--- List Vehicles
-function ListMenuSpawner()
+-- Vehicle Spawn Menu
+function OpenSpawnerMenu()
+	IsInMainMenu = true
 	local elements = {
 		{label = _U('dont_abuse')}
 	}
@@ -85,14 +29,21 @@ function ListMenuSpawner()
 		align    = 'top-left',
 		elements = elements
 	}, function(data, menu)
+		IsInMainMenu = false
 		menu.close()
 		SpawnVehicle(data.current.model)
 	end, function(data, menu)
+		IsInMainMenu = false
 		menu.close()
+
+		CurrentAction     = 'spawner_point'
+		CurrentActionMsg  = _U('press_to_enter')
+		CurrentActionData = {}
 	end)
 end
 
-function ListMenuReturn()
+-- Vehicle Return Menu
+function OpenReturnMenu()
 	local playerCoords = GetEntityCoords(PlayerPedId())
 
 	vehicles = ESX.Game.GetVehiclesInArea(playerCoords, 5.0)
@@ -104,11 +55,7 @@ function ListMenuReturn()
 end
 
 function SpawnVehicle(model)
-	ESX.Game.SpawnVehicle(model, {
-		x = this_Spawner.Spawner.x,
-		y = this_Spawner.Spawner.y,
-		z = this_Spawner.Spawner.z + 1
-	}, this_Spawner.Spawner.h)
+	ESX.Game.SpawnVehicle(model, this_Spawner.Loc, this_Spawner.Heading)
 end
 
 -- Entered Marker
@@ -126,69 +73,84 @@ end)
 
 -- Exited Marker
 AddEventHandler('esx_vehiclespawner:hasExitedMarker', function()
-	ESX.UI.Menu.CloseAll()
+	if not IsInMainMenu then
+		ESX.UI.Menu.CloseAll()
+	end
+
 	CurrentAction = nil
 end)
 
--- Draw Markers
-Citizen.CreateThread(function()
-	while true do
-		Citizen.Wait(1)
-
-		local playerPed = PlayerPedId()
-		local coords    = GetEntityCoords(playerPed)
-		local canSleep  = true
-
-		for k,v in pairs(Config.SpawnerLocations) do
-			if (GetDistanceBetweenCoords(coords, v.Marker.x, v.Marker.y, v.Marker.z, true) < Config.DrawDistance) then
-				canSleep = false
-				DrawMarker(Config.MarkerType, v.Marker.x, v.Marker.y, v.Marker.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0, Config.MarkerInfo.x, Config.MarkerInfo.y, Config.MarkerInfo.z, Config.MarkerInfo.r, Config.MarkerInfo.g, Config.MarkerInfo.b, 100, false, true, 2, false, false, false, false)	
-				DrawMarker(Config.MarkerType, v.Deleter.x, v.Deleter.y, v.Deleter.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0, Config.MarkerInfo2.x, Config.MarkerInfo2.y, Config.MarkerInfo2.z, Config.MarkerInfo2.r, Config.MarkerInfo2.g, Config.MarkerInfo2.b, 100, false, true, 2, false, false, false, false)	
-			end
-		end
-
-		if canSleep then
-			Citizen.Wait(500)
+-- Resource Stop
+AddEventHandler('onResourceStop', function(resource)
+	if resource == GetCurrentResourceName() then
+		if IsInMainMenu then
+			ESX.UI.Menu.CloseAll()
 		end
 	end
 end)
 
--- Activate Menu when in Markers
+-- Create Blips
 Citizen.CreateThread(function()
-	local currentZone = ''
+	for k,v in pairs(Config.Zones) do
+		local blip = AddBlipForCoord(v.Pos)
+
+		SetBlipSprite (blip, Config.BlipVehicleSpawner.Sprite)
+		SetBlipColour (blip, Config.BlipVehicleSpawner.Color)
+		SetBlipDisplay(blip, Config.BlipVehicleSpawner.Display)
+		SetBlipScale  (blip, Config.BlipVehicleSpawner.Scale)
+		SetBlipAsShortRange(blip, true)
+
+		BeginTextCommandSetBlipName('STRING')
+		AddTextComponentSubstringPlayerName(_U('blip_spawner'))
+		EndTextCommandSetBlipName(blip)
+	end
+end)
+
+-- Enter / Exit marker events & Draw Markers
+Citizen.CreateThread(function()
 	while true do
-		Citizen.Wait(1)
-
-		local playerPed  = PlayerPedId()
-		local coords     = GetEntityCoords(playerPed)
-		local isInMarker = false
-
-		for k,v in pairs(Config.SpawnerLocations) do
-			if (GetDistanceBetweenCoords(coords, v.Marker.x, v.Marker.y, v.Marker.z, true) < Config.MarkerInfo.x) then
-				isInMarker   = true
-				this_Spawner = v
-				currentZone  = 'spawner_point'
-			end
-
-			if(GetDistanceBetweenCoords(coords, v.Deleter.x, v.Deleter.y, v.Deleter.z, true) < Config.MarkerInfo2.x) then
-				isInMarker   = true
-				this_Spawner = v
-				currentZone  = 'deleter_point'
+		Citizen.Wait(0)
+		local playerCoords = GetEntityCoords(PlayerPedId())
+		local isInMarker, letSleep, currentZone = false, true
+		
+		for k,v in pairs(Config.Zones) do
+			local distance = #(playerCoords - v.Pos)
+			local distance2 = #(playerCoords - v.Del)
+			
+			if distance < Config.DrawDistance then
+				letSleep = false
+				
+				if Config.MenuMarker.Type ~= -1 then
+					DrawMarker(Config.MenuMarker.Type, v.Pos, 0.0, 0.0, 0.0, 0, 0.0, 0.0, Config.MenuMarker.x, Config.MenuMarker.y, Config.MenuMarker.z, Config.MenuMarker.r, Config.MenuMarker.g, Config.MenuMarker.b, 100, false, true, 2, false, false, false, false)
+				end
+				
+				if Config.DelMarker.Type ~= -1 then
+					DrawMarker(Config.DelMarker.Type, v.Del, 0.0, 0.0, 0.0, 0, 0.0, 0.0, Config.DelMarker.x, Config.DelMarker.y, Config.DelMarker.z, Config.DelMarker.r, Config.DelMarker.g, Config.DelMarker.b, 100, false, true, 2, false, false, false, false)
+				end
+				
+				if distance < Config.MenuMarker.x then
+					isInMarker, currentZone = true, 'spawner_point'
+					this_Spawner = v
+				end
+				
+				if distance2 < Config.DelMarker.x then
+					isInMarker, currentZone = true, 'deleter_point'
+					this_Spawner = v
+				end
 			end
 		end
-
-		if isInMarker and not hasAlreadyEnteredMarker then
-			hasAlreadyEnteredMarker = true
-			LastZone                = currentZone
+		
+		if (isInMarker and not HasAlreadyEnteredMarker) or (isInMarker and LastZone ~= currentZone) then
+			HasAlreadyEnteredMarker, LastZone = true, currentZone
 			TriggerEvent('esx_vehiclespawner:hasEnteredMarker', currentZone)
 		end
-
-		if not isInMarker and hasAlreadyEnteredMarker then
-			hasAlreadyEnteredMarker = false
+		
+		if not isInMarker and HasAlreadyEnteredMarker then
+			HasAlreadyEnteredMarker = false
 			TriggerEvent('esx_vehiclespawner:hasExitedMarker', LastZone)
 		end
-
-		if not isInMarker then
+		
+		if letSleep then
 			Citizen.Wait(500)
 		end
 	end
@@ -199,14 +161,14 @@ Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)
 
-		if CurrentAction ~= nil then
+		if CurrentAction then
 			ESX.ShowHelpNotification(CurrentActionMsg)
 
 			if IsControlJustReleased(0, 38) then
 				if CurrentAction == 'spawner_point' then
-					OpenMenuSpawner('spawner_point')
+					OpenSpawnerMenu()
 				elseif CurrentAction == 'deleter_point' then
-					OpenMenuSpawner('deleter_point')
+					OpenReturnMenu()
 				end
 
 				CurrentAction = nil
@@ -216,51 +178,3 @@ Citizen.CreateThread(function()
 		end
 	end
 end)
-
--- Blips
-function deleteBlips()
-	if BlipList[1] ~= nil then
-		for i=1, #BlipList, 1 do
-			RemoveBlip(BlipList[i])
-			BlipList[i] = nil
-		end
-	end
-end
-
-function refreshBlips()
-	if Config.EnableBlips then
-		if Config.EnableSpecificOnly then
-			if ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'unemployed' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'gang' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'fisherman' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'fueler' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'lumberjack' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'miner' or ESX.PlayerData.job ~= nil and ESX.PlayerData.job.name == 'butcher' then
-				for k,v in pairs(Config.SpawnerLocations) do
-					local blip = AddBlipForCoord(v.Marker.x, v.Marker.y)
-
-					SetBlipSprite (blip, Config.BlipSpawner.Sprite)
-					SetBlipDisplay(blip, Config.BlipSpawner.Display)
-					SetBlipScale  (blip, Config.BlipSpawner.Scale)
-					SetBlipColour (blip, Config.BlipSpawner.Color)
-					SetBlipAsShortRange(blip, true)
-
-					BeginTextCommandSetBlipName("STRING")
-					AddTextComponentString(_U('blip_spawner'))
-					EndTextCommandSetBlipName(blip)
-					table.insert(BlipList, blip)
-				end
-			end
-		else
-			for k,v in pairs(Config.SpawnerLocations) do
-				local blip = AddBlipForCoord(v.Marker.x, v.Marker.y)
-
-				SetBlipSprite (blip, Config.BlipSpawner.Sprite)
-				SetBlipDisplay(blip, Config.BlipSpawner.Display)
-				SetBlipScale  (blip, Config.BlipSpawner.Scale)
-				SetBlipColour (blip, Config.BlipSpawner.Color)
-				SetBlipAsShortRange(blip, true)
-
-				BeginTextCommandSetBlipName("STRING")
-				AddTextComponentString(_U('blip_spawner'))
-				EndTextCommandSetBlipName(blip)
-				table.insert(BlipList, blip)
-			end
-		end
-	end
-end
