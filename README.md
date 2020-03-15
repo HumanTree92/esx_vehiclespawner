@@ -1,10 +1,16 @@
 # About esx_vehiclespawner:
-Vehicle Spawner based on ESX Servers
+Vehicle Spawner for ESX
 
 This is just a simple Code that i put together to allow players to spawn certain Vehicles from the Config. Can be used for anything but i have it set to Trailers.
 
+# Helpfull Info:
+* Players able to spawn Trailers
+
 # Requirements:
-Nothing but ESX!!!
+* Required:
+  * [es_extended](https://github.com/ESX-Org/es_extended)
+* Optional:
+  * NONE
 
 # Download & Installation:
 1) Download the .zip.
@@ -17,6 +23,8 @@ If you like this please check out some of my other stuff like
 * [esx_advancedgarage](https://github.com/HumanTree92/esx_advancedgarage)
 * [esx_advancedvehicleshop](https://github.com/HumanTree92/esx_advancedvehicleshop)
 * [esx_advancedhospital](https://github.com/HumanTree92/esx_advancedhospital)
+* [esx_advancedweaponshop](https://github.com/HumanTree92/esx_advancedweaponshop)
+* [esx_advancedfuel](https://github.com/HumanTree92/esx_advancedfuel)
 * [esx_extraitems](https://github.com/HumanTree92/esx_extraitems)
 * [esx_licenseshop](https://github.com/HumanTree92/esx_licenseshop)
 * [esx_vehiclespawner](https://github.com/HumanTree92/esx_vehiclespawner)
@@ -47,7 +55,7 @@ Scripts that will no longer be Maintained.
 
 # Legal
 ### License
-esx_vehiclespawner - Vehicle Spawner for ESX Servers.
+esx_vehiclespawner - Vehicle Spawner for ESX
 
 Copyright (C) 2011-2020 Velociti Entertainment
 
