@@ -62,6 +62,6 @@ Config.Vehicles = {
 	},
 	{
 		model = 'trailers4',
-		label = 'Container Trailer'
+		label = 'White Container Trailer'
 	}
 }
