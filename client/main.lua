@@ -26,7 +26,7 @@ function OpenSpawnerMenu()
 
 	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'vehicle_spawner', {
 		title    = _U('vehicle_spawner'),
-		align    = 'top-left',
+		align    = Config.MenuAlign,
 		elements = elements
 	}, function(data, menu)
 		IsInMainMenu = false
