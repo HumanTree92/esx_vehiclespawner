@@ -25,8 +25,8 @@ function OpenSpawnerMenu()
 	end
 
 	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'vehicle_spawner', {
-		title    = _U('vehicle_spawner'),
-		align    = Config.MenuAlign,
+		title = _U('vehicle_spawner'),
+		align = Config.MenuAlign,
 		elements = elements
 	}, function(data, menu)
 		IsInMainMenu = false
@@ -36,8 +36,8 @@ function OpenSpawnerMenu()
 		IsInMainMenu = false
 		menu.close()
 
-		CurrentAction     = 'spawner_point'
-		CurrentActionMsg  = _U('press_to_enter')
+		CurrentAction = 'spawner_point'
+		CurrentActionMsg = _U('press_to_enter')
 		CurrentActionData = {}
 	end)
 end
@@ -61,12 +61,12 @@ end
 -- Entered Marker
 AddEventHandler('esx_vehiclespawner:hasEnteredMarker', function(zone)
 	if zone == 'spawner_point' then
-		CurrentAction     = 'spawner_point'
-		CurrentActionMsg  = _U('press_to_enter')
+		CurrentAction = 'spawner_point'
+		CurrentActionMsg = _U('press_to_enter')
 		CurrentActionData = {}
 	elseif zone == 'deleter_point' then
-		CurrentAction     = 'deleter_point'
-		CurrentActionMsg  = _U('press_to_enter2')
+		CurrentAction = 'deleter_point'
+		CurrentActionMsg = _U('press_to_enter2')
 		CurrentActionData = {}
 	end
 end)
@@ -91,18 +91,20 @@ end)
 
 -- Create Blips
 Citizen.CreateThread(function()
-	for k,v in pairs(Config.Zones) do
-		local blip = AddBlipForCoord(v.Pos)
+	if Config.UseBlips then
+		for k,v in pairs(Config.Zones) do
+			local blip = AddBlipForCoord(v.Pos)
 
-		SetBlipSprite (blip, Config.BlipVehicleSpawner.Sprite)
-		SetBlipColour (blip, Config.BlipVehicleSpawner.Color)
-		SetBlipDisplay(blip, Config.BlipVehicleSpawner.Display)
-		SetBlipScale  (blip, Config.BlipVehicleSpawner.Scale)
-		SetBlipAsShortRange(blip, true)
+			SetBlipSprite (blip, Config.BlipVehicleSpawner.Sprite)
+			SetBlipColour (blip, Config.BlipVehicleSpawner.Color)
+			SetBlipDisplay(blip, Config.BlipVehicleSpawner.Display)
+			SetBlipScale  (blip, Config.BlipVehicleSpawner.Scale)
+			SetBlipAsShortRange(blip, true)
 
-		BeginTextCommandSetBlipName('STRING')
-		AddTextComponentSubstringPlayerName(_U('blip_spawner'))
-		EndTextCommandSetBlipName(blip)
+			BeginTextCommandSetBlipName('STRING')
+			AddTextComponentSubstringPlayerName(_U('blip_spawner'))
+			EndTextCommandSetBlipName(blip)
+		end
 	end
 end)
 

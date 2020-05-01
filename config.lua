@@ -8,6 +8,8 @@ Config.MenuMarker = {Type = 1, r = 0, g = 255, b = 0, x = 1.5, y = 1.5, z = 1.0}
 Config.DelMarker = {Type = 1, r = 255, g = 0, b = 0, x = 5.0, y = 5.0, z = 1.0} -- Delete Marker | Red w/Large Size
 Config.BlipVehicleSpawner = {Sprite = 479, Color = 2, Display = 2, Scale = 1.0}
 
+Config.UseBlips = false -- true = Use Vehicle Spawner Blips
+
 Config.Zones = {
 	VehicleSpawner1 = { -- Los Santos Docks
 		Pos = vector3(1246.3, -3256.8, 5.0), -- Enter Marker
