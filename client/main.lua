@@ -1,5 +1,5 @@
 local CurrentActionData, this_Spawner = {}, {}
-local HasAlreadyEnteredMarker = false
+local HasAlreadyEnteredMarker, IsInMainMenu = false, false
 local LastZone, CurrentAction, CurrentActionMsg
 ESX = nil
 
@@ -73,7 +73,7 @@ end)
 
 -- Exited Marker
 AddEventHandler('esx_vehiclespawner:hasExitedMarker', function()
-	if not IsInMainMenu then
+	if not IsInMainMenu or IsInMainMenu then
 		ESX.UI.Menu.CloseAll()
 	end
 
