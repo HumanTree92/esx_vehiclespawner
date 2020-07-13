@@ -18,4 +18,4 @@ What Version of es_extended are you using?:
 Are you using a Pre-Installed ESX?: 
 Are you using Essentialmode?: 
 Are you using OneSync?: 
-Linux or Windows?:
+Linux or Windows?: 
