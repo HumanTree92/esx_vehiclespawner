@@ -7,7 +7,7 @@ Vehicle Spawner for ESX V1 Final or EXM - Made by Human Tree92 ([Velociti Entert
 * Failue to due any of the above will result in Topic being deleted & you being Blocked. The Pre-Written text helps me with getting to the Bottom of the Issues & i hate explaining things over & over.
 
 # Helpfull Info:
-* Players able to spawn Vehicles/Trailers list in the config.lua
+* Players able to spawn Vehicles/Trailers listed in the config.lua
 
 # Requirements:
 * Required:
@@ -16,10 +16,10 @@ Vehicle Spawner for ESX V1 Final or EXM - Made by Human Tree92 ([Velociti Entert
   * NONE
 
 # Download & Installation:
-1) Download the .zip.
-2) Extract the .zip or Open the .zip.
-3) Place `esx_vehiclespawner` in your ESX Directory
-4) Add `start esx_vehiclespawner` to your server.cfg
+1) Download Master or Release & Extract the .zip or Open the .zip.
+2) Place `esx_vehiclespawner` in your ESX Directory
+3) Add `start esx_vehiclespawner` to your server.cfg
+4) Add `setr esx_MenuAlign "top-right"` to your server.cfg
 
 # Other Scripts:
 If you like this please check out some of my other stuff like

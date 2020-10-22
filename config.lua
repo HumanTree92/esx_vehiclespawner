@@ -1,7 +1,6 @@
 Config = {}
 Config.Locale = 'en'
 
-Config.MenuAlign = 'top-left'
 Config.DrawDistance = 20
 
 Config.MenuMarker = {Type = 1, r = 0, g = 255, b = 0, x = 1.5, y = 1.5, z = 1.0} -- Menu Marker | Green w/Standard Size
