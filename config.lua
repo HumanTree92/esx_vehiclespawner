@@ -41,7 +41,11 @@ Config.Vehicles = {
 	},
 	{
 		model = 'tanker',
-		label = 'Tanker Trailer'
+		label = 'Tanker Trailer 1'
+	},
+	{
+		model = 'tanker2',
+		label = 'Tanker Trailer 2'
 	},
 	{
 		model = 'docktrailer',
