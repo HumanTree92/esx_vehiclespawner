@@ -13,29 +13,42 @@ end)
 -- Vehicle Spawn Menu
 function OpenSpawnerMenu()
 	IsInMainMenu = true
-	local elements = {
-		{label = _U('dont_abuse')}
-	}
-
-	for i=1, #Config.Vehicles, 1 do
-		table.insert(elements, {
-			label = Config.Vehicles[i].label,
-			model = Config.Vehicles[i].model
-		})
-	end
-
 	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'vehicle_spawner', {
 		title = _U('vehicle_spawner'),
 		align = GetConvar('esx_MenuAlign', 'top-left'),
-		elements = elements
-	}, function(data, menu)
-		IsInMainMenu = false
-		menu.close()
-		SpawnVehicle(data.current.model)
+		elements = {
+			{label = _U('dont_abuse')},
+			{label = _U('default_veh'), value = 'default_veh'}
+	}}, function(data, menu)
+		local action = data.current.value
+
+		if action == 'default_veh' then
+			local elements2 = {}
+
+			for i=1, #Config.Vehicles, 1 do
+				 table.insert(elements2, {
+					label = Config.Vehicles[i].label,
+					model = Config.Vehicles[i].model
+				 })
+			end
+
+			ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'default_veh', {
+				title = _U('default_veh'),
+				align = GetConvar('esx_MenuAlign', 'top-left'),
+				elements = elements2
+			}, function(data, menu)
+				if ESX.Game.IsSpawnPointClear(this_Spawner.Loc, 5.0) then
+					IsInMainMenu = false
+					menu.close()
+					SpawnVehicle(data.current.model)
+				else
+					ESX.ShowNotification(_U('spawnpoint_blocked'))
+				end
+			end)
+		end
 	end, function(data, menu)
 		IsInMainMenu = false
 		menu.close()
-
 		CurrentAction = 'spawner_point'
 		CurrentActionMsg = _U('press_to_enter')
 		CurrentActionData = {}

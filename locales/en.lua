@@ -7,4 +7,6 @@ Locales['en'] = {
 	['list_spawners'] = 'List of Trailers',
 	['return_spawners'] = 'Return a Trailer',
 	['dont_abuse'] = 'If you Abuse this you will be Banned!',
+	['default_veh'] = 'Default Trailers',
+	['spawnpoint_blocked'] = 'Trailer spawn point is ~r~blocked~s~!',
 }
