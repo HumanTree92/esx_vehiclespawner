@@ -41,3 +41,16 @@ Config.Vehicles = {
 	{model = 'trailers3', label = 'Big G Goods Trailer | Semi'},
 	{model = 'trailers4', label = 'White Container Trailer | Semi'}
 }
+
+Config.ListedVehicles = {
+	'boattrailer',
+	'trailersmall',
+	'tanker',
+	'tanker2',
+	'docktrailer',
+	'trailerlogs',
+	'trailers',
+	'trailers2',
+	'trailers3',
+	'trailers4'
+}

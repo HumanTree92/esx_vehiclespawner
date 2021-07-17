@@ -58,13 +58,26 @@ end
 -- Vehicle Return Menu
 function OpenReturnMenu()
 	local playerCoords = GetEntityCoords(PlayerPedId())
-
 	vehicles = ESX.Game.GetVehiclesInArea(playerCoords, 5.0)
+
 	if #vehicles > 0 then
-		for k,v in ipairs(vehicles) do
-			ESX.Game.DeleteVehicle(v)
+		for i=1, #vehicles, 1 do
+			Model = GetEntityModel(vehicles[i])
+
+			if isVehicleListed(Model) then
+				ESX.Game.DeleteVehicle(vehicles[i])
+			end
 		end
 	end
+end
+
+function isVehicleListed(Model)
+	for _,listedVehicle in pairs(Config.ListedVehicles) do
+		if Model == GetHashKey(listedVehicle) then
+			return true
+		end
+	end
+	return false
 end
 
 function SpawnVehicle(model)
@@ -127,44 +140,46 @@ Citizen.CreateThread(function()
 		Citizen.Wait(0)
 		local playerCoords = GetEntityCoords(PlayerPedId())
 		local isInMarker, letSleep, currentZone = false, true
-		
+
 		for k,v in pairs(Config.Zones) do
 			local distance = #(playerCoords - v.Pos)
 			local distance2 = #(playerCoords - v.Del)
-			
+
 			if distance < Config.DrawDistance then
 				letSleep = false
-				
+
 				if Config.MenuMarker.Type ~= -1 then
 					DrawMarker(Config.MenuMarker.Type, v.Pos, 0.0, 0.0, 0.0, 0, 0.0, 0.0, Config.MenuMarker.x, Config.MenuMarker.y, Config.MenuMarker.z, Config.MenuMarker.r, Config.MenuMarker.g, Config.MenuMarker.b, 100, false, true, 2, false, false, false, false)
 				end
-				
+
+				if distance < Config.MenuMarker.x then
+					isInMarker, this_Spawner, currentZone = true, v, 'spawner_point'
+				end
+			end
+
+			if distance2 < Config.DrawDistance then
+				letSleep = false
+
 				if Config.DelMarker.Type ~= -1 then
 					DrawMarker(Config.DelMarker.Type, v.Del, 0.0, 0.0, 0.0, 0, 0.0, 0.0, Config.DelMarker.x, Config.DelMarker.y, Config.DelMarker.z, Config.DelMarker.r, Config.DelMarker.g, Config.DelMarker.b, 100, false, true, 2, false, false, false, false)
 				end
-				
-				if distance < Config.MenuMarker.x then
-					isInMarker, currentZone = true, 'spawner_point'
-					this_Spawner = v
-				end
-				
+
 				if distance2 < Config.DelMarker.x then
-					isInMarker, currentZone = true, 'deleter_point'
-					this_Spawner = v
+					isInMarker, this_Spawner, currentZone = true, v, 'deleter_point'
 				end
 			end
 		end
-		
+
 		if (isInMarker and not HasAlreadyEnteredMarker) or (isInMarker and LastZone ~= currentZone) then
 			HasAlreadyEnteredMarker, LastZone = true, currentZone
 			TriggerEvent('esx_vehiclespawner:hasEnteredMarker', currentZone)
 		end
-		
+
 		if not isInMarker and HasAlreadyEnteredMarker then
 			HasAlreadyEnteredMarker = false
 			TriggerEvent('esx_vehiclespawner:hasExitedMarker', LastZone)
 		end
-		
+
 		if letSleep then
 			Citizen.Wait(500)
 		end
