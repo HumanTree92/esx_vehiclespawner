@@ -1,5 +1,5 @@
 # About esx_vehiclespawner:
-Vehicle Spawner for ESX V1 Final, Legacy, &/or EXM - Edited/Made by Human Tree92 ([Velociti Entertainment Customs & Wiki]( http://www.velocitientertainment.com/customs/ ))
+Vehicle Spawner for ESX Legacy - Edited/Made by Human Tree92 ([Velociti Entertainment Customs & Wiki]( http://www.velocitientertainment.com/customs/ ))
 
 # Creating Issues
 * Check the [Closed Topics]( https://github.com/HumanTree92/esx_vehiclespawner/issues?q=is%3Aissue+is%3Aclosed ) & [Wiki]( http://www.velocitientertainment.com/customs/ ) before opening an issue to see if your issue has already been Answered.
@@ -11,11 +11,7 @@ Vehicle Spawner for ESX V1 Final, Legacy, &/or EXM - Edited/Made by Human Tree92
 
 # Requirements:
 * Required:
-  * ESX Legacy Links - Use one of the following
-    * [es_extended V1 Final]( https://github.com/esx-framework/es_extended/tree/v1-final )
-	* [es_extended Legacy]( https://github.com/esx-framework/es_extended/tree/legacy )
-	* [ESX Legacy]( https://github.com/esx-framework/esx-legacy )
-	* [ExtendedMode]( https://github.com/extendedmode/extendedmode )
+  * [ESX Legacy]( https://github.com/esx-framework/esx-legacy )
 * Optional:
   * NONE
 
@@ -64,7 +60,7 @@ Scripts that will no longer be Maintained.
 
 # Legal
 ### License
-esx_vehiclespawner - Vehicle Spawner for ESX V1 Final, Legacy, &/or EXM
+esx_vehiclespawner - Vehicle Spawner for ESX Legacy
 
 Copyright (C) 2011-2021 Velociti Entertainment
 

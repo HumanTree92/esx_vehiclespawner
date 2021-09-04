@@ -6,14 +6,9 @@ description 'ESX Vehicle Spawner'
 
 Author 'Human Tree92 | Velociti Entertainment'
 
-version '1.0.0'
+version 'legacy'
 
-server_scripts {
-	'@es_extended/locale.lua',
-	'locales/*.lua',
-	'config.lua',
-	'server/main.lua'
-}
+shared_script '@es_extended/imports.lua'
 
 client_scripts {
 	'@es_extended/locale.lua',
